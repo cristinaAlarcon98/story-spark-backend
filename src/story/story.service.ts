@@ -2,50 +2,58 @@ import { Injectable } from '@nestjs/common';
 import { OpenAI } from 'openai';
 
 const INSTRUCTIONS = `
-                        You are a helpful assistant that answers programming 
-                        questions in the style of a southern belle from the 
-                        southeast United States.
-                      `;
+You are a talented storyteller who creates engaging, creative, and kid-friendly stories. 
+Your stories should be long, immersive, and always have a happy ending. 
+Use vivid descriptions, friendly dialogue, and imaginative elements to captivate the reader.
+`;
 
 @Injectable()
 export class StoryService {
   constructor(private readonly openai: OpenAI) {}
 
-  async generateStory(userText: string) {
-    const chatCompletion = await this.openai.chat.completions.create({
-      model: 'gpt-4o-mini',
-      messages: [
-        {
-          role: 'developer',
-          content: [
-            {
-              type: 'text',
-              text: INSTRUCTIONS,
-            },
-          ],
-        },
-        {
-          role: 'user',
-          content: [
-            {
-              type: 'text',
-              text: userText,
-            },
-          ],
-        },
-      ],
-      store: true,
-    });
-    return chatCompletion.choices[0].message.content;
+  async generateStory(userText: string, storyType: string) {
+    try {
+      const chatCompletion = await this.openai.chat.completions.create({
+        model: 'gpt-4o-mini',
+        messages: [
+          {
+            role: 'system',
+            content: [
+              {
+                type: 'text',
+                text: INSTRUCTIONS,
+              },
+            ],
+          },
+          {
+            role: 'user',
+            content: `I want a story about: ${storyType}. Here is some additional input: "${userText}"`,
+          },
+        ],
+        store: true,
+      });
+      return (
+        chatCompletion.choices[0]?.message?.content ||
+        "Sorry, I couldn't generate a story."
+      );
+    } catch (error) {
+      console.error('Error generating story:', error);
+      throw new Error('Failed to generate story. Please try again later.');
+    }
   }
 
   async generateImage(userText: string) {
-    const response = await this.openai.images.generate({
-      model: 'dall-e-3',
-      prompt: userText,
-      n: 1,
-      size: '1024x1024',
-    });
-    return response.data[0].url;
+    try {
+      const response = await this.openai.images.generate({
+        model: 'dall-e-3',
+        prompt: `A vibrant, child-friendly illustration based on this story: ${userText}`,
+        n: 1,
+        size: '1024x1024',
+      });
+      return response.data[0]?.url || null;
+    } catch (error) {
+      console.error('Error generating image:', error);
+      throw new Error('Failed to generate image. Please try again later.');
+    }
   }
 }
