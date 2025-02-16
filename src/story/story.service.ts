@@ -36,6 +36,16 @@ export class StoryService {
       ],
       store: true,
     });
-    return chatCompletion.choices[0].message;
+    return chatCompletion.choices[0].message.content;
+  }
+
+  async generateImage(userText: string) {
+    const response = await this.openai.images.generate({
+      model: 'dall-e-3',
+      prompt: userText,
+      n: 1,
+      size: '1024x1024',
+    });
+    return response.data[0].url;
   }
 }

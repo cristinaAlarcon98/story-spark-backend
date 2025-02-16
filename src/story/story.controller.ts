@@ -1,13 +1,25 @@
 import { Body, Controller, Post } from '@nestjs/common';
 import { StoryService } from './story.service';
 
-@Controller('story')
+@Controller('generate')
 export class StoryController {
   constructor(private readonly storyService: StoryService) {}
 
-  @Post('generate')
+  @Post('text')
   async generateStory(@Body('message') message: string) {
-    const generatedStory = await this.storyService.generateStory(message);
-    return { story: generatedStory };
+    const generatedStoryResponse =
+      await this.storyService.generateStory(message);
+    return {
+      story: generatedStoryResponse,
+    };
+  }
+
+  @Post('image')
+  async generateImage(@Body('message') message: string) {
+    const generatedImageResponse =
+      await this.storyService.generateImage(message);
+    return {
+      imageUrl: generatedImageResponse,
+    };
   }
 }
