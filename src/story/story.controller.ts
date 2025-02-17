@@ -8,14 +8,12 @@ export class StoryController {
 
   @Post('text')
   async generateStory(@Body() generateStoryDto: GenerateStoryDto) {
-    const { userText, storyType } = generateStoryDto;
-    const generatedStoryResponse = await this.storyService.generateStory(
-      userText,
+    const { userPrompt, storyType } = generateStoryDto;
+    const storyPages = await this.storyService.generateStory(
+      userPrompt,
       storyType,
     );
-    return {
-      story: generatedStoryResponse,
-    };
+    return { storyPages };
   }
 
   @Post('image')

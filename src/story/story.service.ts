@@ -32,21 +32,29 @@ export class StoryService {
         ],
         store: true,
       });
-      return (
+      const fullStory =
         chatCompletion.choices[0]?.message?.content ||
-        "Sorry, I couldn't generate a story."
-      );
+        "Sorry, I couldn't generate a story.";
+
+      const wordsPerPage = 100;
+      const storyPages = fullStory.split(' ').reduce((acc, word, index) => {
+        const pageIndex = Math.floor(index / wordsPerPage);
+        acc[pageIndex] = (acc[pageIndex] || '') + ' ' + word;
+        return acc;
+      }, [] as string[]);
+
+      return storyPages;
     } catch (error) {
       console.error('Error generating story:', error);
       throw new Error('Failed to generate story. Please try again later.');
     }
   }
 
-  async generateImage(userText: string) {
+  async generateImage(userPrompt: string) {
     try {
       const response = await this.openai.images.generate({
         model: 'dall-e-3',
-        prompt: `A vibrant, child-friendly illustration based on this story: ${userText}`,
+        prompt: `A vibrant, child-friendly illustration based on this story: ${userPrompt}`,
         n: 1,
         size: '1024x1024',
       });
